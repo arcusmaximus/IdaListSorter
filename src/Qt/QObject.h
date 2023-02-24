@@ -3,7 +3,7 @@
 struct QMetaObject
 {
     void* Super;
-    QArrayData* StringData;
+    QArrayData<char>* StringData;
 };
 
 class QObject
@@ -11,9 +11,9 @@ class QObject
 public:
     virtual QMetaObject* GetMetaObject() = 0;
 
-    std::string GetTypeName()
+    const char* GetTypeName()
     {
         QMetaObject* pMetadata = GetMetaObject();
-        return pMetadata->StringData[0].AsString();
+        return pMetadata->StringData[0].GetData();
     }
 };

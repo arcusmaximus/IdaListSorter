@@ -3,11 +3,11 @@
 class QString
 {
 public:
-    std::wstring str()
+    bool operator==(const wchar_t* psz) const
     {
-        return _data->AsWString();
+        return wcscmp(_data->GetData(), psz) == 0;
     }
 
 private:
-    QArrayData* _data;
+    QArrayData<wchar_t>* _data;
 };

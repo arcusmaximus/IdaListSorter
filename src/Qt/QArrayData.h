@@ -1,5 +1,6 @@
 #pragma once
 
+template<typename T>
 struct QArrayData
 {
     int Refcount;
@@ -7,19 +8,8 @@ struct QArrayData
     int Capacity;
     long long Offset;
 
-    template<typename T>
     const T* GetData()
     {
         return (const T*)((BYTE*)this + Offset);
-    }
-
-    std::string AsString()
-    {
-        return std::string(GetData<char>(), Size);
-    }
-
-    std::wstring AsWString()
-    {
-        return std::wstring(GetData<wchar_t>(), Size);
     }
 };

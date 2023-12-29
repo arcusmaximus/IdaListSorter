@@ -5,6 +5,9 @@ using namespace std;
 extern "C"
 {
     void (*QObject_setObjectName)(QObject* pObj, QString& name);
+    void (*QDialog_showEvent)(QObject* pDialog, QObject* pEvent);
+
+    QTableView* SortPatch_TableView;
 
     extern void SortPatch_HookSetObjectName();
 
@@ -16,23 +19,13 @@ extern "C"
         {
             QTableView* pView = (QTableView*)pObj;
             if (name == L"Choose a structure for offset" ||
+                name == L"Choose a structure (not the current!)" ||
                 name == L"Choose union representation" ||
-                name == L"Functions" ||
-                name == L"Exports" ||
                 name == L"Choose a name" ||
                 name == L"Choose a enum name" ||
-                name == L"Choose a structure name" ||
-                name == L"Names")
+                name == L"Choose a structure name")
             {
-                pView->sortByColumn(0, 0);
-            }
-            else if (name == L"Local Types")
-            {
-                pView->sortByColumn(1, 0);
-            }
-            else if (name == L"Imports")
-            {
-                pView->sortByColumn(2, 0);
+                SortPatch_TableView = pView;
             }
         }
         else if (strcmp(pTypeName, "SOStructsAndUnions") == 0)
@@ -42,6 +35,17 @@ extern "C"
             pView->sortByColumn(0, 0);
         }
     }
+
+    extern void SortPatch_HookDialogShowEvent();
+
+    void SortPatch_HandleDialogShowEvent(QObject* pDialog, QObject* pEvent)
+    {
+        if (SortPatch_TableView == nullptr)
+            return;
+
+        SortPatch_TableView->sortByColumn(0, 0);
+        SortPatch_TableView = nullptr;
+    }
 }
 
 void SortPatch::Apply()
@@ -50,10 +54,12 @@ void SortPatch::Apply()
         return;
 
     QObject_setObjectName = (decltype(QObject_setObjectName))GetProcAddress(QModule::Core, "?setObjectName@QObject@QT@@QEAAXAEBVQString@2@@Z");
-    if (QObject_setObjectName == nullptr)
+    QDialog_showEvent = (decltype(QDialog_showEvent))GetProcAddress(QModule::Widgets, "?showEvent@QDialog@QT@@MEAAXPEAVQShowEvent@2@@Z");
+    if (QObject_setObjectName == nullptr || QDialog_showEvent == nullptr)
         return;
 
     DetourTransactionBegin();
     DetourAttach((void**)&QObject_setObjectName, SortPatch_HookSetObjectName);
+    DetourAttach((void**)&QDialog_showEvent, SortPatch_HookDialogShowEvent);
     DetourTransactionCommit();
 }

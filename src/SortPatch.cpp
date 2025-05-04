@@ -20,10 +20,13 @@ extern "C"
             QTableView* pView = (QTableView*)pObj;
             if (name == L"Choose a structure for offset" ||
                 name == L"Choose a structure (not the current!)" ||
+                name == L"Choose a structure name" ||
+                name == L"Select a structure:1" ||
                 name == L"Choose union representation" ||
                 name == L"Choose a name" ||
                 name == L"Choose a enum name" ||
-                name == L"Choose a structure name")
+                name == L"Please choose enum" ||
+                name == L"Choose a type")
             {
                 SortPatch_TableView = pView;
             }
